@@ -6,12 +6,12 @@ const isAuth = require("../middleware/is-auth");
 
 const feedController = require("../controllers/feed");
 
-// router.get("/posts", isAuth, feedController.getPosts);
+router.get("/posts", isAuth, feedController.getPosts);
 
-router.post("/post", feedController.uploadPost);
+router.post("/post", isAuth, feedController.uploadPost);
 
-router.put("/posts", feedController.updatePost);
+router.put("/post/:postId", feedController.updatePost);
 
-// router.delete("/posts", isAuth, feedController.deletePost);
+router.delete("/posts/:postId", feedController.deletePost);
 
 module.exports = router;

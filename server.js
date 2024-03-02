@@ -9,12 +9,18 @@ const multer = require("multer");
 
 const authRoutes = require("./routes/auth");
 const feedRoutes = require("./routes/feed");
+// const userRoutes = require("./routes/user");
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images");
+    console.log(req.file.path);
+    // console.log(file);
+    cb(null, "Images");
+    console.log(cb(null, "Images"));
   },
-  filename: (req, file, res) => {
+  filename: (req, file, cb) => {
+    console.log(file);
+
     cb(null, new Date().toISOString() + "-" + file.originalname);
   },
 });
@@ -37,7 +43,7 @@ app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
 
-app.use(express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -51,6 +57,7 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/feed", feedRoutes);
+// app.use("/user", userRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
