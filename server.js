@@ -9,8 +9,8 @@ const authRoutes = require("./routes/auth");
 
 const { validationResult } = require("express-validator");
 
-const MONGODB_URL =
-  "mongodb+srv://kethankumarreddy392002:IzGwyMpXb2YeZN0c@cluster0.0mmik9m.mongodb.net/socialMediaDb";
+// const MONGODB_URL =
+//   "mongodb+srv://yaswanth:123@cluster0.bvwugob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 app.use(bodyParser.json());
 
 app.use(authRoutes);
@@ -18,10 +18,14 @@ app.use(authRoutes);
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message;
-  res.status(status).json({ message: message });
+  const errorData = err.data;
+
+  res.status(status).json({ message: message, errorData: errorData });
 });
 mongoose
-  .connect(MONGODB_URL)
+  .connect(
+    "mongodb+srv://209x1a2830:yash1234@cluster0.c56vvqy.mongodb.net/socialMediaDb?retryWrites=true&w=majority&appName=Cluster0"
+  )
   .then(() => {
     console.log("connected");
     app.listen(3000, (err) => {

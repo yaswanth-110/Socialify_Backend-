@@ -1,7 +1,6 @@
 const User = require("../models/user");
 const Post = require("../models/post");
-const friends = require("../models/friends");
-const friendRequest = require("../models/friendRequest");
+const Friend = require("../models/friend");
 
 exports.getPosts = (req, re, next) => {
   const userId = req.userId;

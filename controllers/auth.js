@@ -4,10 +4,36 @@ const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
 
+const nodemailer = require("nodemailer");
+
+const sendGridTransport = require("nodemailer-sendgrid-transport");
+
+const { validationResult } = require("express-validator");
+
+const transporter = nodemailer.createTransport(
+  sendGridTransport({
+    auth: {
+      api_key:
+        "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",
+    },
+  })
+);
+
 exports.signup = (req, res, next) => {
-  const email = req.body.mail;
-  const username = req.body.name;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const error = new Error("Please enter a valid email");
+    error.statusCode = 400;
+    error.data = errors.array();
+    throw error;
+  }
+  console.log(error.array());
+  const email = req.body.email;
+  const name = req.body.name;
+  const username = req.body.username;
   const password = req.body.password;
+  const confirmPassword = req.body.confirmpassword;
 
   bcrypt
     .hash(password, 12)
@@ -15,7 +41,8 @@ exports.signup = (req, res, next) => {
       const user = new User({
         email: email,
         password: hashPassword,
-        name: username,
+        name: name,
+        username: username,
       });
       return user.save();
     })
@@ -26,6 +53,9 @@ exports.signup = (req, res, next) => {
       });
     })
     .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
       next(err);
     });
 };
