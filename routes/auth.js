@@ -24,24 +24,24 @@ router.post(
       .isAlphanumeric(),
     body("name").trim().not().isEmpty(),
     body("username").trim().not().isEmpty(),
-    body("confirmPassword").custom((value, { req }) => {
-      if (value != req.body.password) {
-        throw new Error("passwords have to match");
-      }
-    }),
-    body("username").custom((value, { req }) => {
-      User.findOne({ username: value })
-        .then((userDoc) => {
-          if (userDoc) {
-            return Promise.reject(
-              "This username is already in use,please enter a unique username"
-            );
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }),
+    // body("confirmpassword").custom((value, { req }) => {
+    //   if (value != req.body.password) {
+    //     throw new Error("passwords have to match");
+    //   }
+    // }),
+    // body("username").custom((value, { req }) => {
+    //   User.findOne({ username: value })
+    //     .then((userDoc) => {
+    //       if (userDoc) {
+    //         return Promise.reject(
+    //           "This username is already in use,please enter a unique username"
+    //         );
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // }),
   ],
   authController.signup
 );

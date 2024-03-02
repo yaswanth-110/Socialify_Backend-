@@ -28,12 +28,12 @@ exports.signup = (req, res, next) => {
     error.data = errors.array();
     throw error;
   }
-  console.log(error.array());
+  console.log(errors.array());
   const email = req.body.email;
   const name = req.body.name;
   const username = req.body.username;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmpassword;
+  //   const confirmPassword = req.body.confirmpassword;
 
   bcrypt
     .hash(password, 12)
