@@ -4,40 +4,45 @@ const Friend = require("../models/friend");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
-const { ResultWithContextImpl } = require("express-validator/src/chain");
+const { log } = require("console");
 
-exports.getPosts = (req, re, next) => {
+//GET FOLLWERS POSTS
+
+exports.getPosts = (req, res, next) => {
   const userId = req.userId;
-  Post.findById({ creator: userId })
-    .populate("creator")
+  Post.find()
     .then((posts) => {
-      if (!posts) {
+      console.log(posts);
+      if (posts.length === 0) {
         const error = new Error("No posts are available");
         error.statusCode = 400;
         throw error;
       }
       res
-        .status(400)
+        .status(200)
         .json({ message: "posts retrieved successfully", posts: posts });
     })
     .catch((err) => {
-      console.log(err);
+      //   console.log(err);
       next(err);
     });
 };
 
+//UPLOAD A POST
+
 exports.uploadPost = (req, res, next) => {
-  const imageUrl = req.file.path;
   const description = req.body.description;
-  let creator;
 
-  console.log(req.file);
+  // console.log(req.file);
 
-  //   if (!req.file) {
-  //     const error = new Error("No images provided");
-  //     error.statusCode = 422;
-  //     throw error;
-  //   }
+  if (!req.file) {
+    const error = new Error("No images provided");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const imageUrl = req.file.path;
+
   const userId = req.userId;
   const post = new Post({
     imageUrl: imageUrl,
@@ -62,16 +67,17 @@ exports.uploadPost = (req, res, next) => {
     });
 };
 
+//UPDATE A POST
+
 exports.updatePost = (req, res, next) => {
   const postId = req.params.postId;
   const description = req.body.description;
   let imageUrl = req.body.image;
-  const userId = req.userId;
   if (req.file) {
     imageUrl = req.file.path;
   }
-  if (!req.file) {
-    const error = new Error("No image is found");
+  if (!imageUrl) {
+    const error = new Error("No image is picked");
     error.statusCode = 422;
     throw error;
   }
@@ -104,22 +110,45 @@ exports.updatePost = (req, res, next) => {
     });
 };
 
-exports.deletePost = (req, res, next) => {
+// GET EDIT POST
+
+exports.getEditPost = (req, res, next) => {
   const postId = req.params.postId;
   Post.findById(postId)
+    .populate("creator")
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Post is not available");
+        error.statusCode = 402;
+        throw error;
+      }
+
+      res
+        .status(200)
+        .json({ message: "post retrieved successfully", post: post });
+    })
+    .catch((err) => next(err));
+};
+
+//DELETE A POST
+
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findOneAndDelete(postId)
     .then((post) => {
       if (!post) {
         const error = new Error("Could not find post");
         error.statusCode = 422;
         throw error;
       }
+      console.log(post);
       if (post.creator.toString() !== req.userId) {
         const error = new Error("Not authorized");
         error.statusCode = 403;
         throw error;
       }
+
       clearImage(post.imageUrl);
-      return post.findAndRemove(postId);
     })
     .then((result) => {
       res.status(200).json({ message: "Deleted post" });
@@ -129,7 +158,97 @@ exports.deletePost = (req, res, next) => {
     });
 };
 
+// LIKED A POST
+
+exports.likedPost = (req, res, next) => {
+  const postId = req.params.postId;
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error("Not authenticated");
+        error.statusCode = 401;
+        throw error;
+      }
+      return Post.findById(postId);
+    })
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Post is not available");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      if (post.likes.includes(req.userId)) {
+        const filterLikes = post.likes.filter(
+          (p) => p.toString() !== req.userId
+        );
+        console.log(filterLikes);
+        post.likes = filterLikes;
+      } else {
+        post.likes.push(req.userId);
+      }
+      return post.save();
+    })
+    .then((result) => {
+      return Post.findById(postId).populate("likes");
+    })
+    .then((updatedPost) => {
+      res.status(200).json({ message: "Liked post", post: updatedPost });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+//COMMENT ON A POST
+
+exports.commentPost = (req, res, next) => {
+  const postId = req.params.postId;
+
+  const comment = req.body.comment;
+  const commentObject = {
+    user: req.userId,
+    text: comment,
+  };
+  let userDetails;
+  User.findById(req.userId)
+    .then((user) => {
+      if (!user) {
+        const error = new Error("Not authenticated");
+        error.statusCode = 401;
+        throw error;
+      }
+
+      return Post.findById(postId);
+    })
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Post is not available");
+        error.statusCode = 400;
+        throw error;
+      }
+      post.comments.push(commentObject);
+      return post.save();
+    })
+    .then((result) => {
+      return Post.findById(postId).populate("comments.user");
+    })
+    .then((updatedPost) => {
+      res.status(200).json({
+        message: "commented on Post",
+        post: updatedPost,
+        userDetails: userDetails,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+// CLEAR A IMAGE FROM IMAGES DIRECTORY
+
 const clearImage = (filepath) => {
+  console.log(__dirname);
   filepath = path.join(__dirname, "..", filepath);
   fs.unlink(filepath, (err) => {
     console.log(err);

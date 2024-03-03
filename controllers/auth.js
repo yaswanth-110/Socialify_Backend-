@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Friend = require("../models/friend");
 
 const bcrypt = require("bcrypt");
 
@@ -34,6 +35,7 @@ exports.signup = (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
   //   const confirmPassword = req.body.confirmpassword;
+  let sigupnUser;
 
   bcrypt
     .hash(password, 12)
@@ -47,9 +49,22 @@ exports.signup = (req, res, next) => {
       return user.save();
     })
     .then((userDoc) => {
+      sigupnUser = userDoc;
+      const friend = new Friend({
+        userId: userDoc._id,
+      });
+      return friend.save();
+    })
+    .then((result) => {
+      // transporter.sendMail({
+      //   to: email,
+      //   from: "no-reply@insta.com",
+      //   subject: "signedup successfully",
+      //   body: "<h2>Welcome to instagram</h2>",
+      // });
       res.status(201).json({
         message: "user account created successfully",
-        userId: userDoc._id,
+        userId: sigupnUser._id,
       });
     })
     .catch((err) => {
@@ -87,7 +102,13 @@ exports.login = (req, res, next) => {
         "supersecretkey",
         { expiresIn: "1hr" }
       );
-      res.status(200).json({ token: token, userId: loadUser._id.toString() });
+      res
+        .status(200)
+        .json({
+          token: token,
+          userDetails: loadUser,
+          userId: loadUser._id.toString(),
+        });
     })
     .catch((err) => {
       if (!err.statusCode) {

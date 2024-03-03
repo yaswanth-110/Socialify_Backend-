@@ -8,10 +8,16 @@ const feedController = require("../controllers/feed");
 
 router.get("/posts", isAuth, feedController.getPosts);
 
+router.get("edit-post/post", isAuth, feedController.getEditPost);
+
+router.put("/post/like/:postId", isAuth, feedController.likedPost);
+
+router.put("/post/comment/:postId", isAuth, feedController.commentPost);
+
 router.post("/post", isAuth, feedController.uploadPost);
 
-router.put("/post/:postId", feedController.updatePost);
+router.put("/:postId", isAuth, feedController.updatePost);
 
-router.delete("/posts/:postId", feedController.deletePost);
+router.delete("/:postId", isAuth, feedController.deletePost);
 
 module.exports = router;

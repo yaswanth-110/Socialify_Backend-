@@ -21,16 +21,12 @@ const userSchema = new Schema({
   },
   profileImageUrl: {
     type: String,
+    default: " ",
   },
   bio: {
     type: String,
+    default: "",
   },
-  friends: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
 });
 
 module.exports = mongoose.model("User", userSchema);

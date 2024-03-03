@@ -1,13 +1,18 @@
-// const express = require("express");
+const express = require("express");
+const isAuth = require("../middleware/is-auth");
 
-// const router = express.Router();
+const router = express.Router();
 
-// const userController = require("../controllers/user");
+const userController = require("../controllers/user");
 
-// router.get("/:userName");
+router.get("/userProfile", isAuth, userController.getuserProfile);
 
-// router.get("/:userName/follow");
+router.put("/userProfile", isAuth, userController.updateuserProfile);
 
-// router.get("");
+router.get("/:username", isAuth, userController.getUser);
 
-// module.exports = router;
+// router.put("/:username", isAuth, userController.userFollowAndFollwer);
+
+// router.put("/friends/:username", isAuth, userController.postFriends);
+
+module.exports = router;

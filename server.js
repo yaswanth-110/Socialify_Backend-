@@ -9,39 +9,37 @@ const multer = require("multer");
 
 const authRoutes = require("./routes/auth");
 const feedRoutes = require("./routes/feed");
-// const userRoutes = require("./routes/user");
+const userRoutes = require("./routes/user");
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    console.log(req.file.path);
-    // console.log(file);
     cb(null, "Images");
-    console.log(cb(null, "Images"));
   },
   filename: (req, file, cb) => {
-    console.log(file);
-
-    cb(null, new Date().toISOString() + "-" + file.originalname);
+    cb(
+      null,
+      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
+    );
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/jpg" ||
-    file.mimetype === "image/jpeg"
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
+// const fileFilter = (req, file, cb) => {
+//   if (
+//     file.mimetype === "image/png" ||
+//     file.mimetype === "image/jpg" ||
+//     file.mimetype === "image/jpeg"
+//   ) {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// };
+
+// const upload = multer({ storage: fileStorage });
 
 app.use(bodyParser.json());
 
-app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
-);
+app.use(multer({ storage: fileStorage }).single("image"));
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
@@ -57,14 +55,13 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/feed", feedRoutes);
-// app.use("/user", userRoutes);
+app.use("/user", userRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message;
-  const errorData = err.data;
 
-  res.status(status).json({ message: message, errorData: errorData });
+  res.status(status).json({ message: message, errorData: err });
 });
 mongoose
   .connect(

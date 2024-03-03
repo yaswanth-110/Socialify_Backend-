@@ -4,20 +4,18 @@ const Schema = mongoose.Schema;
 
 const friendSchema = new Schema(
   {
-    user: {
-      type: String,
+    userId: {
+      type: Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
-    friend: {
-      type: String,
-      required: true,
-      ref: "User",
-    },
-    status: {
-      type: String,
-      default: "pending",
-    },
+
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
