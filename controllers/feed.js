@@ -9,40 +9,58 @@ const { log } = require("console");
 //GET FOLLWERS POSTS
 
 exports.getPosts = (req, res, next) => {
-  const userId = req.userId;
-  console.log(req.userId);
-
-  Friend.findOne({ userId: userId })
-    .then((user) => {
-      console.log(user.userId);
-      if (!user) {
-        const error = new Error("No authenticated");
-        error.statusCode = 401;
-        throw error;
-      }
-
-      const friendsIds = user.friendRequestSent.map((f) => f);
-      return Post.find({ creator: { $in: friendsIds } })
-        .populate("creator")
-        .sort("-createdAt");
-    })
-
+  Post.find()
+    .populate("creator")
     .then((posts) => {
-      console.log(posts);
       if (posts.length === 0) {
-        const error = new Error("No posts are available");
-        error.statusCode = 400;
-        throw error;
+        res
+          .status(400)
+          .json({ message: "No posts are available", posts: posts });
       }
       res
         .status(200)
         .json({ message: "posts retrieved successfully", posts: posts });
     })
     .catch((err) => {
-      //   console.log(err);
       next(err);
     });
 };
+
+// exports.getPosts = (req, res, next) => {
+//   const userId = req.userId;
+//   console.log(req.userId);
+
+//   Friend.findOne({ userId: userId })
+//     .then((user) => {
+//       console.log(user.userId);
+//       if (!user) {
+//         const error = new Error("No authenticated");
+//         error.statusCode = 401;
+//         throw error;
+//       }
+
+//       const friendsIds = user.friendRequestSent.map((f) => f);
+//       return Post.find({ creator: { $in: friendsIds } })
+//         .populate("creator")
+//         .sort("-createdAt");
+//     })
+
+//     .then((posts) => {
+//       console.log(posts);
+//       if (posts.length === 0) {
+//         const error = new Error("No posts are available");
+//         error.statusCode = 400;
+//         throw error;
+//       }
+//       res
+//         .status(200)
+//         .json({ message: "posts retrieved successfully", posts: posts });
+//     })
+//     .catch((err) => {
+//       //   console.log(err);
+//       next(err);
+//     });
+// };
 
 //GET SPECIFIC POST
 
@@ -155,11 +173,24 @@ exports.updatePost = (req, res, next) => {
 
 exports.getEditPost = (req, res, next) => {
   const postId = req.params.postId;
+
   Post.findById(postId)
     .populate("creator")
     .then((post) => {
       if (!post) {
         const error = new Error("Post is not available");
+        error.statusCode = 402;
+        throw error;
+      }
+
+      if (
+        !(
+          mongoose.Types.ObjectId.createFromHexString(req.userId) !==
+          post.creator._id
+        )
+      ) {
+        console.log("I am here ");
+        const error = new Error("Not Authorized!");
         error.statusCode = 402;
         throw error;
       }
@@ -223,7 +254,6 @@ exports.likedPost = (req, res, next) => {
         const filterLikes = post.likes.filter(
           (p) => p.toString() !== req.userId
         );
-        console.log(filterLikes);
         post.likes = filterLikes;
       } else {
         post.likes.push(req.userId);

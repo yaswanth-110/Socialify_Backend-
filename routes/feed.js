@@ -10,7 +10,7 @@ router.get("/posts", isAuth, feedController.getPosts);
 
 router.get("/:postId", isAuth, feedController.getPost);
 
-router.get("edit-post/post", isAuth, feedController.getEditPost);
+router.get("/edit-post/:postId", isAuth, feedController.getEditPost);
 
 router.put("/post/like/:postId", isAuth, feedController.likedPost);
 
