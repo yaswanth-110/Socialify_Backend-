@@ -10,7 +10,23 @@ const { log } = require("console");
 
 exports.getPosts = (req, res, next) => {
   const userId = req.userId;
-  Post.find()
+  console.log(req.userId);
+
+  Friend.findOne({ userId: userId })
+    .then((user) => {
+      console.log(user.userId);
+      if (!user) {
+        const error = new Error("No authenticated");
+        error.statusCode = 401;
+        throw error;
+      }
+
+      const friendsIds = user.friendRequestSent.map((f) => f);
+      return Post.find({ creator: { $in: friendsIds } })
+        .populate("creator")
+        .sort("-createdAt");
+    })
+
     .then((posts) => {
       console.log(posts);
       if (posts.length === 0) {
@@ -28,12 +44,37 @@ exports.getPosts = (req, res, next) => {
     });
 };
 
+//GET SPECIFIC POST
+
+exports.getPost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .populate("creator")
+    .populate("likes")
+    .populate("comments.user")
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Post is not available");
+        error.statusCode = 400;
+        throw error;
+      }
+      res
+        .status(200)
+        .json({ message: "post retrieved successfully", post: post });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 //UPLOAD A POST
 
 exports.uploadPost = (req, res, next) => {
   const description = req.body.description;
 
   // console.log(req.file);
+
+  console.log("hi");
 
   if (!req.file) {
     const error = new Error("No images provided");

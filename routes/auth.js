@@ -13,8 +13,14 @@ router.post(
   [
     body("email")
       .isEmail()
-      .withMessage("Please enter a valid message")
-      .normalizeEmail(),
+      .normalizeEmail()
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((user) => {
+          if (user) {
+            return Promise.reject("This email is already exists");
+          }
+        });
+      }),
     body(
       "password",
       "please enter a password with only numbers and text and at least 5 characters"
@@ -22,26 +28,19 @@ router.post(
       .trim()
       .isLength({ min: 5 })
       .isAlphanumeric(),
+
     body("name").trim().not().isEmpty(),
-    body("username").trim().not().isEmpty(),
-    // body("confirmpassword").custom((value, { req }) => {
-    //   if (value != req.body.password) {
-    //     throw new Error("passwords have to match");
-    //   }
-    // }),
-    // body("username").custom((value, { req }) => {
-    //   User.findOne({ username: value })
-    //     .then((userDoc) => {
-    //       if (userDoc) {
-    //         return Promise.reject(
-    //           "This username is already in use,please enter a unique username"
-    //         );
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // }),
+    body("username")
+      .trim()
+      .not()
+      .isEmpty()
+      .custom((value, { req }) => {
+        return User.findOne({ username: value }).then((user) => {
+          if (user) {
+            return Promise.reject("This username is already in use");
+          }
+        });
+      }),
   ],
   authController.signup
 );

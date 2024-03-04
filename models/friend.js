@@ -10,6 +10,18 @@ const friendSchema = new Schema(
       ref: "User",
     },
 
+    friendRequestSent: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    friendRequestRecieved: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     friends: [
       {
         type: Schema.Types.ObjectId,

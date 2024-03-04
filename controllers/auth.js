@@ -22,14 +22,14 @@ const transporter = nodemailer.createTransport(
 
 exports.signup = (req, res, next) => {
   const errors = validationResult(req);
+  console.log(errors);
 
   if (!errors.isEmpty()) {
-    const error = new Error("Please enter a valid email");
+    const error = new Error("Validation failed");
     error.statusCode = 400;
     error.data = errors.array();
     throw error;
   }
-  console.log(errors.array());
   const email = req.body.email;
   const name = req.body.name;
   const username = req.body.username;
@@ -102,13 +102,11 @@ exports.login = (req, res, next) => {
         "supersecretkey",
         { expiresIn: "1hr" }
       );
-      res
-        .status(200)
-        .json({
-          token: token,
-          userDetails: loadUser,
-          userId: loadUser._id.toString(),
-        });
+      res.status(200).json({
+        token: token,
+        userDetails: loadUser,
+        userId: loadUser._id.toString(),
+      });
     })
     .catch((err) => {
       if (!err.statusCode) {
