@@ -100,7 +100,7 @@ exports.uploadPost = (req, res, next) => {
     throw error;
   }
 
-  const imageUrl = req.file.path;
+  const imageUrl = req.file.path.replace("\\", "/");
 
   const userId = req.userId;
   const post = new Post({
@@ -133,7 +133,7 @@ exports.updatePost = (req, res, next) => {
   const description = req.body.description;
   let imageUrl = req.body.image;
   if (req.file) {
-    imageUrl = req.file.path;
+    imageUrl = req.file.path.replace("\\", "/");
   }
   if (!imageUrl) {
     const error = new Error("No image is picked");

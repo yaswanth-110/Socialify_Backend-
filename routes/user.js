@@ -4,6 +4,7 @@ const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 const userController = require("../controllers/user");
+
 const user = require("../models/user");
 
 router.get("/userProfile", isAuth, userController.getuserProfile);

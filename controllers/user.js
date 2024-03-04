@@ -63,7 +63,7 @@ exports.updateuserProfile = (req, res, next) => {
   let message;
 
   if (req.file) {
-    profileImage = req.file.path;
+    profileImage = req.file.path.replace("\\", "/");
   }
   User.findById(userId)
     .then((user) => {
@@ -104,7 +104,7 @@ exports.getUser = (req, res, next) => {
     })
     .then((posts) => {
       res.status(200).json({
-        posts: posts.length != 0 ? posts : "No posts are available",
+        posts: posts.length !== 0 ? posts : "No posts are available",
         userDetails: userDocument,
       });
     })
