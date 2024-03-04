@@ -4,7 +4,6 @@ Socialify is a social media application built using React for the front end, Nod
 #**Features**:
 ### User Authentication:
      ● Users should be able to sign up and log in using their username and password.
-     ● Extra Points: Integrate Google OAuth for seamless login/signup.
 ### User Profile:
      ● Users can create and customize their profiles, adding personal information and a
       display picture.
@@ -15,10 +14,22 @@ Socialify is a social media application built using React for the front end, Nod
 ### Post Interaction:
      ● Users can edit and delete their own posts.
      ● Users can like and comment on other users' posts.
-     ● Users receive notifications for likes and comments on their posts.
 ### Friend System:
      ● Users can add other users as friends.
-     ● Users can view a list of their friends and their activities.
-     ● Users can chat with their friends via messaging.
 ### Search Functionality:
      ● Users can search for other users by username or name.
+
+# Run Following commands to Test application locally in your device
+# Clone the project
+
+### git clone https://github.com/yaswanth-110/Socialify_Backend-.git
+     In the project directory, we have frontend-react and backend-node directory which are specific to frontend and backend applications respectively:
+
+### To run frontend :
+    cd frontend
+    npm install
+    npm run dev
+### To start backend :
+    cd backend
+    npm install
+    npm start
